@@ -1,0 +1,54 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:mysql://{DB-HOST}:{DB-PORT}/{DB-NAME}?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&allowMultiQueries=true
+    username: { DB-USERNAME }
+    password: { DB-PASSWORD }
+    hikari:
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      maximum-pool-size: 10
+      minimum-idle: 1
+  jpa:
+    generate-ddl: false
+    show-sql: false # JPA SQL  로그 출력 여부를 설정
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: com.study.kafka.config.strategy.CustomCamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: false
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: order-product
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      transactional:
+        id: kafka-stock-id
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        orm:
+          jdbc:
+            bind: TRACE #hibernate sql 파라미터 바인드 값 확인해줌(trace로 해야 잘나옴) Hibernate 6 이상 버전 적용
+      springframework:
+        orm:
+          jpa: ERROR
+        transaction: DEBUG
+        kafka:
+          core: INFO
+          transaction: TRACE
